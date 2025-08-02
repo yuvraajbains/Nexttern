@@ -66,7 +66,7 @@ Nexttern is a full-stack web platform designed to revolutionize the internship s
 ---
 
 ## License & Usage
-This project is original work by Yuvraaj Bains. All rights reserved. No one is permitted to copy, replicate, or redistribute this project in its entirety without explicit permission.
+This project is original work by Yuvraj Bains. All rights reserved. No one is permitted to copy, replicate, or redistribute this project in its entirety without explicit permission.
 
 ---
 
