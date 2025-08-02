@@ -1,0 +1,35 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+backend/nexttern/nexttern/src/main/resources/schema.sql
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+application.properties
+.env
+src/main/resources/schema.sql
+src/test/java/com/nexttern/NextternApplicationTests.java
+src/test 

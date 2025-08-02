@@ -1,0 +1,35 @@
+# Spring Boot application properties (secrets)
+backend/nexttern/nexttern/src/main/resources/application.properties
+backend/nexttern/nexttern/src/main/resources/application-*.properties
+backend/nexttern/nexttern/target/classes/application.properties
+backend/nexttern/nexttern/target/classes/application-*.properties
+
+# VS Code settings
+.vscode/
+.VSCodeCounter
+
+# Node.js dependencies and build outputs
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+# Maven build output
+backend/nexttern/nexttern/target/
+
+# Environment variables (frontend)
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+#supabase tables
+supabase/migrations/
+backend/nexttern/nexttern/supabase_setup
+
+#setup files
+backend/nexttern/nexttern/setup-dynamodb-local.ps1
+lambda-scraper
+lambda-notifications
