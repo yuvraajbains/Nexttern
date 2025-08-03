@@ -105,11 +105,11 @@ function AppRoutes() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="global-main min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col">
         <Suspense fallback={
           <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#050c2e] to-[#1a2151]">
-            <div className="animate-pulse flex flex-col items-center">
+            <div className="animate-pulse flex flex-col items-center global-section">
               <div className="h-4 w-32 bg-gradient-to-r from-blue-400 to-green-400 rounded mb-3"></div>
               <div className="h-2 w-24 bg-white/30 rounded"></div>
             </div>
@@ -133,12 +133,12 @@ function AppRoutes() {
             <Route path="/signin" element={
               session && !isPasswordRecovery
                 ? <Navigate to="/dashboard" replace />
-                : <AuthWrapper><SignIn onNavigateToSignUp={() => navigate('/signup')} /></AuthWrapper>
+                : <AuthWrapper><div className="global-btn-group"><SignIn onNavigateToSignUp={() => navigate('/signup')} /></div></AuthWrapper>
             } />
             <Route path="/signup" element={
               session && !isPasswordRecovery
                 ? <Navigate to="/dashboard" replace />
-                : <AuthWrapper><SignUp onNavigateToSignIn={() => navigate('/signin')} /></AuthWrapper>
+                : <AuthWrapper><div className="global-btn-group"><SignUp onNavigateToSignIn={() => navigate('/signin')} /></div></AuthWrapper>
             } />
             <Route path="/update-password" element={
               <UpdatePassword onPasswordUpdated={handlePasswordUpdated} />
