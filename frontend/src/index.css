@@ -20,52 +20,6 @@ img {
     padding: 0.5rem;
   }
 }
-/* Global spacing and sizing improvements for mobile */
-.global-btn-group {
-  margin-top: 1rem;
-}
-
-.global-section {
-  margin-bottom: 1.5rem;
-}
-
-.global-card {
-  max-width: 20rem;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.global-main {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-@media (max-width: 640px) {
-  .global-btn-group {
-    margin-top: 1.5rem;
-  }
-  .global-section {
-    margin-bottom: 2rem;
-  }
-  .global-card {
-    max-width: 18rem;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-size: 1.25rem;
-  }
-  body, p, span, li {
-    font-size: 1rem;
-  }
-  .global-main {
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
