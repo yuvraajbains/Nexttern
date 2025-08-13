@@ -339,6 +339,12 @@ export default function Applications({ session }) {
         <main className="flex-1 flex flex-col items-center px-4 py-8 w-full">
           <section className="w-full max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                <button
+                  className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-base font-semibold shadow"
+                  onClick={() => setShowCustomAppModal(true)}
+                >
+                  ＋ Add Custom Application
+                </button>
               <motion.h1
                 className="text-5xl md:text-6xl font-extrabold leading-tight text-center drop-shadow-lg w-full"
                 initial={{ scale: 0.95, opacity: 0 }}
@@ -464,15 +470,7 @@ export default function Applications({ session }) {
                 >
                   {/* Applications List Header */}
                   <div className="bg-white/10 p-4 border-b border-white/10 text-white flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <div className="text-lg font-bold">All Applications ({filteredApplications.length})</div>
-                      <button
-                        className="ml-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-                        onClick={() => setShowCustomAppModal(true)}
-                      >
-                        ＋ Add Custom Application
-                      </button>
-                    </div>
+                    <div className="text-lg font-bold">All Applications ({filteredApplications.length})</div>
                     <div className="text-sm text-gray-400">Last updated: {applications.length > 0 ? formatDate(applications.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0].updated_at) : 'Never'}</div>
                   </div>
         {/* Custom Application Modal */}
