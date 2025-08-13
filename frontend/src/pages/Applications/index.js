@@ -32,6 +32,8 @@ export default function Applications({ session }) {
     status: ApplicationStatus.APPLIED,
     notes: ''
   });
+  const [creationError, setCreationError] = useState(null);
+  const [isSavingNew, setIsSavingNew] = useState(false);
 
   // Handle custom application input change
   const handleCustomAppChange = (e) => {
@@ -47,13 +49,18 @@ export default function Applications({ session }) {
   // Save new custom application
   const saveNewCustomApplication = async () => {
     if (!customApp.title.trim() || !customApp.company.trim()) return;
+    setCreationError(null);
+    setIsSavingNew(true);
     try {
       const now = new Date().toISOString();
+      // internship_id is NOT NULL in schema; generate synthetic ID for custom apps
+      const internshipId = (window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : 'custom-' + Date.now());
       const { data, error } = await supabase
         .from('applications')
         .insert([
           {
             user_id: session.user.id,
+            internship_id: `custom-${internshipId}`,
             title: customApp.title.trim(),
             company: customApp.company.trim(),
             location: customApp.location.trim() || null,
@@ -68,7 +75,7 @@ export default function Applications({ session }) {
       if (error) throw error;
       const newApp = data[0];
       setApplications(prev => [newApp, ...prev]);
-      // Reset create state
+      // Close modal & reset
       setIsCreating(false);
       setCustomApp({
         title: '',
@@ -79,7 +86,9 @@ export default function Applications({ session }) {
         notes: ''
       });
     } catch (err) {
-      // Optionally log error
+      setCreationError(err.message || 'Failed to add application.');
+    } finally {
+      setIsSavingNew(false);
     }
   };
   
@@ -780,10 +789,13 @@ export default function Applications({ session }) {
                         onClick={() => { isCreating ? saveNewCustomApplication() : saveNotes(); }}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                       >
-                        {isCreating ? 'Add' : 'Save'}
+                        {isCreating ? (isSavingNew ? 'Adding...' : 'Add') : 'Save'}
                       </motion.button>
                     </div>
                   </div>
+                  {isCreating && creationError && (
+                    <div className="mt-4 text-sm text-red-400">{creationError}</div>
+                  )}
                 </div>
               </motion.div>
             </motion.div>
