@@ -22,8 +22,8 @@ export default function Applications({ session }) {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [deleteConfirmApplication, setDeleteConfirmApplication] = useState(null);
   const [notes, setNotes] = useState('');
-  // State for custom application modal
-  const [showCustomAppModal, setShowCustomAppModal] = useState(false);
+  // State for creating a custom application (creation uses same modal as editing)
+  const [isCreating, setIsCreating] = useState(false);
   const [customApp, setCustomApp] = useState({
     title: '',
     company: '',
@@ -44,30 +44,32 @@ export default function Applications({ session }) {
     setCustomApp((prev) => ({ ...prev, status }));
   };
 
-  // Handle custom application submit
-  const handleCustomAppSubmit = async (e) => {
-    e.preventDefault();
-    if (!customApp.title || !customApp.company) return;
+  // Save new custom application
+  const saveNewCustomApplication = async () => {
+    if (!customApp.title.trim() || !customApp.company.trim()) return;
     try {
+      const now = new Date().toISOString();
       const { data, error } = await supabase
         .from('applications')
         .insert([
           {
             user_id: session.user.id,
-            title: customApp.title,
-            company: customApp.company,
-            location: customApp.location,
-            url: customApp.url,
+            title: customApp.title.trim(),
+            company: customApp.company.trim(),
+            location: customApp.location.trim() || null,
+            url: customApp.url.trim() || null,
             status: customApp.status,
-            notes: customApp.notes,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            notes: customApp.notes.trim() || null,
+            created_at: now,
+            updated_at: now
           }
         ])
         .select();
       if (error) throw error;
-      setApplications((prev) => [data[0], ...prev]);
-      setShowCustomAppModal(false);
+      const newApp = data[0];
+      setApplications(prev => [newApp, ...prev]);
+      // Reset create state
+      setIsCreating(false);
       setCustomApp({
         title: '',
         company: '',
@@ -77,7 +79,7 @@ export default function Applications({ session }) {
         notes: ''
       });
     } catch (err) {
-      // Optionally handle error
+      // Optionally log error
     }
   };
   
@@ -350,9 +352,15 @@ export default function Applications({ session }) {
                 </span>
               </motion.h1>
               <button
-                className="w-full md:w-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold rounded-xl shadow transition-all duration-200"
+                className="w-full md:w-auto px-6 py-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-lg font-semibold shadow transition-all duration-200 backdrop-blur-sm"
                 style={{ maxWidth: 320 }}
-                onClick={() => setShowCustomAppModal(true)}
+                onClick={() => {
+                  setIsCreating(true);
+                  setSelectedApplication(null);
+                  setCustomApp({
+                    title: '', company: '', location: '', url: '', status: ApplicationStatus.APPLIED, notes: ''
+                  });
+                }}
               >
                 ＋ Add Custom Application
               </button>
@@ -473,142 +481,7 @@ export default function Applications({ session }) {
                     <div className="text-lg font-bold">All Applications ({filteredApplications.length})</div>
                     <div className="text-sm text-gray-400">Last updated: {applications.length > 0 ? formatDate(applications.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0].updated_at) : 'Never'}</div>
                   </div>
-        {/* Custom Application Modal */}
-        <AnimatePresence>
-          {showCustomAppModal && (
-            <motion.div
-              key="custom-app-modal"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-            >
-              <motion.form
-                onSubmit={handleCustomAppSubmit}
-                initial={{ y: 40, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 40, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white/10 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20 shadow-xl"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-6">
-                    <h2 className="text-2xl font-bold text-white">Add Custom Application</h2>
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowCustomAppModal(false)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      ✖️
-                    </motion.button>
-                  </div>
-                  <div className="mb-6">
-                    <div className="text-lg font-semibold text-gray-300 mb-1">Application Details</div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Position / Title</label>
-                      <input
-                        type="text"
-                        name="title"
-                        value={customApp.title}
-                        onChange={handleCustomAppChange}
-                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Company</label>
-                      <input
-                        type="text"
-                        name="company"
-                        value={customApp.company}
-                        onChange={handleCustomAppChange}
-                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
-                      <input
-                        type="text"
-                        name="location"
-                        value={customApp.location}
-                        onChange={handleCustomAppChange}
-                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Link to Posting (optional)</label>
-                      <input
-                        type="url"
-                        name="url"
-                        value={customApp.url}
-                        onChange={handleCustomAppChange}
-                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  {/* Status Selection */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Application Status</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {Object.entries(statusConfig).map(([status, config]) => (
-                        <motion.button
-                          type="button"
-                          whileHover={{ scale: 1.08 }}
-                          whileTap={{ scale: 0.97 }}
-                          key={status}
-                          onClick={() => handleCustomAppStatus(status)}
-                          className={`px-3 py-2 rounded text-sm flex items-center justify-center ${
-                            customApp.status === status
-                              ? `${config.color} text-white`
-                              : 'bg-white/10 hover:bg-white/20 text-gray-300'
-                          }`}
-                        >
-                          <span className="mr-1.5">{config.icon}</span>
-                          {config.title}
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="mb-6">
-                    <label htmlFor="custom-notes" className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-                    <textarea
-                      id="custom-notes"
-                      name="notes"
-                      rows="4"
-                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Add notes about this application, interview details, contacts, or follow-ups..."
-                      value={customApp.notes}
-                      onChange={handleCustomAppChange}
-                    ></textarea>
-                  </div>
-                  <div className="flex justify-between">
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.08 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowCustomAppModal(false)}
-                      className="px-4 py-2 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 hover:text-red-300 transition"
-                    >
-                      Cancel
-                    </motion.button>
-                    <motion.button
-                      type="submit"
-                      whileHover={{ scale: 1.08 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      Add Application
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.form>
-            </motion.div>
-          )}
-        </AnimatePresence>
+  {/* Custom application creation now reuses the main details modal */}
                   {/* Applications List Body with custom scrollbar */}
                   <div
                     className="divide-y divide-white/10 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/40 scrollbar-track-transparent hover:scrollbar-thumb-blue-500/60 transition-all duration-300"
@@ -730,9 +603,9 @@ export default function Applications({ session }) {
             </AnimatePresence>
           </section>
         </main>
-        {/* Application Details Modal */}
+        {/* Application Details / Create Modal */}
         <AnimatePresence>
-          {selectedApplication && (
+          {(selectedApplication || isCreating) && (
             <motion.div
               key="modal"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -750,40 +623,90 @@ export default function Applications({ session }) {
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-6">
-                    <h2 className="text-2xl font-bold text-white">{selectedApplication.title}</h2>
+                    <h2 className="text-2xl font-bold text-white">{isCreating ? 'Add Custom Application' : selectedApplication.title}</h2>
                     <motion.button
                       whileHover={{ scale: 1.15 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedApplication(null)}
+                      onClick={() => { setSelectedApplication(null); setIsCreating(false); }}
                       className="text-gray-400 hover:text-white"
                     >
                       ✖️
                     </motion.button>
                   </div>
-                  <div className="mb-6">
-                    <div className="text-lg font-semibold text-gray-300">{selectedApplication.company}</div>
-                    {selectedApplication.location && (
-                      <div className="text-gray-400">{selectedApplication.location}</div>
-                    )}
-                    <div className="mt-3 flex items-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig[selectedApplication.status]?.color}`}>
-                        {selectedApplication.status}
-                      </span>
-                      <span className="text-sm text-gray-500 ml-2">
-                        Last updated: {formatDate(selectedApplication.updated_at)}
-                      </span>
+                  {!isCreating && selectedApplication && (
+                    <div className="mb-6">
+                      <div className="text-lg font-semibold text-gray-300">{selectedApplication.company}</div>
+                      {selectedApplication.location && (
+                        <div className="text-gray-400">{selectedApplication.location}</div>
+                      )}
+                      <div className="mt-3 flex items-center">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig[selectedApplication.status]?.color}`}>
+                          {selectedApplication.status}
+                        </span>
+                        <span className="text-sm text-gray-500 ml-2">
+                          Last updated: {formatDate(selectedApplication.updated_at)}
+                        </span>
+                      </div>
+                      {selectedApplication.url && (
+                        <div className="mt-4">
+                          <a
+                            href={selectedApplication.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            View Original Posting ↗️
+                          </a>
+                        </div>
+                      )}
                     </div>
-                    <div className="mt-4">
-                      <a
-                        href={selectedApplication.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300"
-                      >
-                        View Original Posting ↗️
-                      </a>
+                  )}
+                  {isCreating && (
+                    <div className="mb-6 grid gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Position / Title</label>
+                        <input
+                          type="text"
+                          name="title"
+                          value={customApp.title}
+                          onChange={handleCustomAppChange}
+                          className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Company</label>
+                        <input
+                          type="text"
+                          name="company"
+                          value={customApp.company}
+                          onChange={handleCustomAppChange}
+                          className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                        <input
+                          type="text"
+                          name="location"
+                          value={customApp.location}
+                          onChange={handleCustomAppChange}
+                          className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Link to Posting (optional)</label>
+                        <input
+                          type="url"
+                          name="url"
+                          value={customApp.url}
+                          onChange={handleCustomAppChange}
+                          className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                   {/* Status Selection */}
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -795,9 +718,15 @@ export default function Applications({ session }) {
                           whileHover={{ scale: 1.08 }}
                           whileTap={{ scale: 0.97 }}
                           key={status}
-                          onClick={() => updateApplicationStatus(selectedApplication.id, status)}
+                          onClick={() => {
+                            if (isCreating) {
+                              handleCustomAppStatus(status);
+                            } else {
+                              updateApplicationStatus(selectedApplication.id, status);
+                            }
+                          }}
                           className={`px-3 py-2 rounded text-sm flex items-center justify-center ${
-                            selectedApplication.status === status
+                            (isCreating ? customApp.status === status : selectedApplication.status === status)
                               ? `${config.color} text-white`
                               : 'bg-white/10 hover:bg-white/20 text-gray-300'
                           }`}
@@ -809,32 +738,38 @@ export default function Applications({ session }) {
                     </div>
                   </div>
                   <div className="mb-6">
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-300 mb-2">
-                      Notes
-                    </label>
+                    <label htmlFor="notes" className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
                     <textarea
                       id="notes"
-                      rows="6"
+                      rows={isCreating ? 4 : 6}
                       className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Add notes about this application, interview details, contacts, or follow-ups..."
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                    ></textarea>
+                      value={isCreating ? customApp.notes : notes}
+                      onChange={(e) => {
+                        if (isCreating) {
+                          setCustomApp(prev => ({ ...prev, notes: e.target.value }));
+                        } else {
+                          setNotes(e.target.value);
+                        }
+                      }}
+                    />
                   </div>
                   <div className="flex justify-between">
-                    <motion.button
-                      whileHover={{ scale: 1.08 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => showDeleteConfirmation(selectedApplication)}
-                      className="px-4 py-2 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 hover:text-red-300 transition"
-                    >
-                      Delete
-                    </motion.button>
+                    {!isCreating ? (
+                      <motion.button
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => showDeleteConfirmation(selectedApplication)}
+                        className="px-4 py-2 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 hover:text-red-300 transition"
+                      >
+                        Delete
+                      </motion.button>
+                    ) : <div />}
                     <div className="space-x-2">
                       <motion.button
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setSelectedApplication(null)}
+                        onClick={() => { setSelectedApplication(null); setIsCreating(false); }}
                         className="px-4 py-2 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 transition"
                       >
                         Cancel
@@ -842,10 +777,10 @@ export default function Applications({ session }) {
                       <motion.button
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={saveNotes}
+                        onClick={() => { isCreating ? saveNewCustomApplication() : saveNotes(); }}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                       >
-                        Save
+                        {isCreating ? 'Add' : 'Save'}
                       </motion.button>
                     </div>
                   </div>
