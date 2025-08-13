@@ -33,3 +33,4 @@ backend/nexttern/nexttern/supabase_setup
 backend/nexttern/nexttern/setup-dynamodb-local.ps1
 lambda-scraper
 lambda-notifications
+lambda-OutsourcedJobs
