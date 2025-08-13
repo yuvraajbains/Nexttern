@@ -338,13 +338,7 @@ export default function Applications({ session }) {
       <div className="flex flex-col relative min-h-screen">
         <main className="flex-1 flex flex-col items-center px-4 py-8 w-full">
           <section className="w-full max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                <button
-                  className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-base font-semibold shadow"
-                  onClick={() => setShowCustomAppModal(true)}
-                >
-                  ＋ Add Custom Application
-                </button>
+            <div className="flex flex-col items-center mb-6 gap-4 w-full">
               <motion.h1
                 className="text-5xl md:text-6xl font-extrabold leading-tight text-center drop-shadow-lg w-full"
                 initial={{ scale: 0.95, opacity: 0 }}
@@ -355,7 +349,13 @@ export default function Applications({ session }) {
                   My Applications
                 </span>
               </motion.h1>
-              {/* Removed Planner link */}
+              <button
+                className="w-full md:w-auto px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold rounded-xl shadow transition-all duration-200"
+                style={{ maxWidth: 320 }}
+                onClick={() => setShowCustomAppModal(true)}
+              >
+                ＋ Add Custom Application
+              </button>
             </div>
             {/* Search and Filter Bar */}
             <motion.div
@@ -505,50 +505,54 @@ export default function Applications({ session }) {
                       ✖️
                     </motion.button>
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Position / Title</label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={customApp.title}
-                      onChange={handleCustomAppChange}
-                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Company</label>
-                    <input
-                      type="text"
-                      name="company"
-                      value={customApp.company}
-                      onChange={handleCustomAppChange}
-                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
-                    <input
-                      type="text"
-                      name="location"
-                      value={customApp.location}
-                      onChange={handleCustomAppChange}
-                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Link to Posting (optional)</label>
-                    <input
-                      type="url"
-                      name="url"
-                      value={customApp.url}
-                      onChange={handleCustomAppChange}
-                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                    <div className="text-lg font-semibold text-gray-300 mb-1">Application Details</div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Position / Title</label>
+                      <input
+                        type="text"
+                        name="title"
+                        value={customApp.title}
+                        onChange={handleCustomAppChange}
+                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Company</label>
+                      <input
+                        type="text"
+                        name="company"
+                        value={customApp.company}
+                        onChange={handleCustomAppChange}
+                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                      <input
+                        type="text"
+                        name="location"
+                        value={customApp.location}
+                        onChange={handleCustomAppChange}
+                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Link to Posting (optional)</label>
+                      <input
+                        type="url"
+                        name="url"
+                        value={customApp.url}
+                        onChange={handleCustomAppChange}
+                        className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  {/* Status Selection */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Application Status</label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {Object.entries(statusConfig).map(([status, config]) => (
                         <motion.button
@@ -581,13 +585,13 @@ export default function Applications({ session }) {
                       onChange={handleCustomAppChange}
                     ></textarea>
                   </div>
-                  <div className="flex justify-end space-x-2">
+                  <div className="flex justify-between">
                     <motion.button
                       type="button"
                       whileHover={{ scale: 1.08 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowCustomAppModal(false)}
-                      className="px-4 py-2 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 transition"
+                      className="px-4 py-2 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 hover:text-red-300 transition"
                     >
                       Cancel
                     </motion.button>
