@@ -22,6 +22,64 @@ export default function Applications({ session }) {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [deleteConfirmApplication, setDeleteConfirmApplication] = useState(null);
   const [notes, setNotes] = useState('');
+  // State for custom application modal
+  const [showCustomAppModal, setShowCustomAppModal] = useState(false);
+  const [customApp, setCustomApp] = useState({
+    title: '',
+    company: '',
+    location: '',
+    url: '',
+    status: ApplicationStatus.APPLIED,
+    notes: ''
+  });
+
+  // Handle custom application input change
+  const handleCustomAppChange = (e) => {
+    const { name, value } = e.target;
+    setCustomApp((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle custom application status change
+  const handleCustomAppStatus = (status) => {
+    setCustomApp((prev) => ({ ...prev, status }));
+  };
+
+  // Handle custom application submit
+  const handleCustomAppSubmit = async (e) => {
+    e.preventDefault();
+    if (!customApp.title || !customApp.company) return;
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .insert([
+          {
+            user_id: session.user.id,
+            title: customApp.title,
+            company: customApp.company,
+            location: customApp.location,
+            url: customApp.url,
+            status: customApp.status,
+            notes: customApp.notes,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ])
+        .select();
+      if (error) throw error;
+      setApplications((prev) => [data[0], ...prev]);
+      setShowCustomAppModal(false);
+      setCustomApp({
+        title: '',
+        company: '',
+        location: '',
+        url: '',
+        status: ApplicationStatus.APPLIED,
+        notes: ''
+      });
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
   
   // Define configuration for status buttons
   const statusConfig = {
@@ -406,9 +464,149 @@ export default function Applications({ session }) {
                 >
                   {/* Applications List Header */}
                   <div className="bg-white/10 p-4 border-b border-white/10 text-white flex justify-between items-center">
-                    <div className="text-lg font-bold">All Applications ({filteredApplications.length})</div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-lg font-bold">All Applications ({filteredApplications.length})</div>
+                      <button
+                        className="ml-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                        onClick={() => setShowCustomAppModal(true)}
+                      >
+                        ＋ Add Custom Application
+                      </button>
+                    </div>
                     <div className="text-sm text-gray-400">Last updated: {applications.length > 0 ? formatDate(applications.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0].updated_at) : 'Never'}</div>
                   </div>
+        {/* Custom Application Modal */}
+        <AnimatePresence>
+          {showCustomAppModal && (
+            <motion.div
+              key="custom-app-modal"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            >
+              <motion.form
+                onSubmit={handleCustomAppSubmit}
+                initial={{ y: 40, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 40, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white/10 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20 shadow-xl"
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-6">
+                    <h2 className="text-2xl font-bold text-white">Add Custom Application</h2>
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowCustomAppModal(false)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      ✖️
+                    </motion.button>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Position / Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={customApp.title}
+                      onChange={handleCustomAppChange}
+                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Company</label>
+                    <input
+                      type="text"
+                      name="company"
+                      value={customApp.company}
+                      onChange={handleCustomAppChange}
+                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={customApp.location}
+                      onChange={handleCustomAppChange}
+                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Link to Posting (optional)</label>
+                    <input
+                      type="url"
+                      name="url"
+                      value={customApp.url}
+                      onChange={handleCustomAppChange}
+                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {Object.entries(statusConfig).map(([status, config]) => (
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.08 }}
+                          whileTap={{ scale: 0.97 }}
+                          key={status}
+                          onClick={() => handleCustomAppStatus(status)}
+                          className={`px-3 py-2 rounded text-sm flex items-center justify-center ${
+                            customApp.status === status
+                              ? `${config.color} text-white`
+                              : 'bg-white/10 hover:bg-white/20 text-gray-300'
+                          }`}
+                        >
+                          <span className="mr-1.5">{config.icon}</span>
+                          {config.title}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mb-6">
+                    <label htmlFor="custom-notes" className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                    <textarea
+                      id="custom-notes"
+                      name="notes"
+                      rows="4"
+                      className="w-full px-3 py-2 bg-white/10 text-gray-200 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Add notes about this application, interview details, contacts, or follow-ups..."
+                      value={customApp.notes}
+                      onChange={handleCustomAppChange}
+                    ></textarea>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <motion.button
+                      type="button"
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowCustomAppModal(false)}
+                      className="px-4 py-2 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 transition"
+                    >
+                      Cancel
+                    </motion.button>
+                    <motion.button
+                      type="submit"
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      Add Application
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.form>
+            </motion.div>
+          )}
+        </AnimatePresence>
                   {/* Applications List Body with custom scrollbar */}
                   <div
                     className="divide-y divide-white/10 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/40 scrollbar-track-transparent hover:scrollbar-thumb-blue-500/60 transition-all duration-300"
