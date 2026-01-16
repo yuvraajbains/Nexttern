@@ -12,7 +12,7 @@ public class GeminiConfig {
     private int timeout = 30000;
     private int maxTokens = 1000;
     private double temperature = 0.7;
-    private String apiVersion = "v1";
+    private String apiVersion = "v1beta";
     private int maxRetries = 3;
     private long retryDelay = 1000;
 
